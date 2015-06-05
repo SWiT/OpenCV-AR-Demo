@@ -106,8 +106,8 @@ while(True):
         gifwarph,gifwarpw,gifwarpd = gifwarp.shape
         
       
-        gifwarp = cv2.cvtColor(gifwarp, cv2.CV_8UC4) #Add alpha channel
-        print gifwarp.shape
+        #gifwarp = cv2.cvtColor(gifwarp, cv2.CV_8UC4) #Add alpha channel
+        #print gifwarp.shape
         
         
         x,y = findCenter(symbol.location)
