@@ -79,6 +79,12 @@ while(True):
         drawBorder(outimg, symbol.location, colorCode[1], 2)
         
         # Insert the GIF frame
+        scalebyheight = gifimgh < gifimgw
+        qrheight = dist(symbol.location[0], symbol.location[1])
+        if scalebyheight:
+            dsize = qrheight/gifimgh
+            gifimg = cv2.resize(gifimg, dsize)
+        
         x,y = findCenter(symbol.location)
         x -= gifimgw/2
         y -= gifimgh/2
