@@ -28,12 +28,8 @@ def gif2img(g):
     img = np.array(g)
     if len(img.shape) == 2:
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR) 
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA) #Add alpha channel
     return img
-
-def dist(p0, p1):
-    return math.sqrt((p0[0] - p1[0])**2 + (p0[1] - p1[1])**2)
-
+        
         
 cap = cv2.VideoCapture(0)
 cap.set(CV_CAP_PROP_FRAME_WIDTH, 1280)
@@ -51,13 +47,12 @@ gif = Image.open("gifs/surprise-kitten.gif")
 gifimg = gif2img(gif)
 gifidx = 0
 
-
 print "\tQ or Esc to exit."
 print
 
 while(True):
     # Capture a frame from the camera, and get it's shape.
-    ret, outimg = cap.read()    
+    ret, outimg = cap.read()  
     outimgh, outimgw, outimgd = outimg.shape
 
     # Get the next frame of the GIF.
@@ -73,13 +68,12 @@ while(True):
         
     # Our operations on the frame come here
     gray = cv2.cvtColor(outimg, cv2.COLOR_BGR2GRAY) #convert to grayscale
-    outimg = cv2.cvtColor(outimg, cv2.COLOR_BGR2BGRA) #Add alpha channel
     zbarimage = zbar.Image(outimgw, outimgh, 'Y800', gray.tostring())
     scanner.scan(zbarimage)
     for symbol in zbarimage:
         #print 'decoded', symbol.type, 'symbol', '"%s"' % symbol.data
         #print symbol.location
-        drawBorder(outimg, symbol.location, colorCode[1], 2)
+        drawBorder(outimg, symbol.location, colorCode[0], 2)
         
         # Warp the GIF frame
         maxx = 0
@@ -97,11 +91,10 @@ while(True):
                 miny = pt[1]
         dsize = (maxx-minx, maxy-miny)
         pts1 = np.float32([[0,0],[0,gifimgh],[gifimgw,gifimgh],[gifimgw,0]])
-        sl = symbol.location
-        p0 = [sl[0][0]-minx,sl[0][1]-miny]
-        p1 = [sl[1][0]-minx,sl[1][1]-miny]
-        p2 = [sl[2][0]-minx,sl[2][1]-miny]
-        p3 = [sl[3][0]-minx,sl[3][1]-miny]
+        p0 = [symbol.location[0][0]-minx, symbol.location[0][1]-miny]
+        p1 = [symbol.location[1][0]-minx, symbol.location[1][1]-miny]
+        p2 = [symbol.location[2][0]-minx, symbol.location[2][1]-miny]
+        p3 = [symbol.location[3][0]-minx, symbol.location[3][1]-miny]
         pts2 = np.float32([p0, p1, p2, p3])
         M = cv2.getPerspectiveTransform(pts1,pts2)
         gifwarp = outimg[miny:maxy, minx:maxx]
@@ -127,6 +120,7 @@ while(True):
             y = 0
             gy0 = 0
         outimg[y:(y+gy1), x:(x+gx1)] = gifwarp[gy0:gy1, gx0:gx1]
+        
     # Display the resulting frame
     cv2.imshow('AR_Demo', outimg)
     
@@ -135,6 +129,6 @@ while(True):
     if key == ord('q') or key ==27: 
         break
 
-# When everything done, release the capture
+# Release the capture, destory the windows
 cap.release()
 cv2.destroyAllWindows()
