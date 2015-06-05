@@ -90,10 +90,12 @@ while(True):
         if x+gifimgw > outimgw:
             gx1 = outimgw - x
         if x < 0:
+            x = 0
             gx0 = 0
         if y+gifimgh > outimgh:
             gy1 = outimgh - y
         if y < 0:
+            y = 0
             gy0 = 0
         outimg[y:(y+gy1), x:(x+gx1)] = gifimg[gy0:gy1, gx0:gx1]
         
