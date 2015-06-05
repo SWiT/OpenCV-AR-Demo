@@ -28,6 +28,7 @@ def gif2img(g):
     img = np.array(g)
     if len(img.shape) == 2:
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR) 
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA) #Add alpha channel
     return img
 
 def dist(p0, p1):
@@ -72,6 +73,7 @@ while(True):
         
     # Our operations on the frame come here
     gray = cv2.cvtColor(outimg, cv2.COLOR_BGR2GRAY) #convert to grayscale
+    outimg = cv2.cvtColor(outimg, cv2.COLOR_BGR2BGRA) #Add alpha channel
     zbarimage = zbar.Image(outimgw, outimgh, 'Y800', gray.tostring())
     scanner.scan(zbarimage)
     for symbol in zbarimage:
@@ -79,7 +81,7 @@ while(True):
         #print symbol.location
         drawBorder(outimg, symbol.location, colorCode[1], 2)
         
-        # Warp & Insert the GIF frame
+        # Warp the GIF frame
         maxx = 0
         maxy = 0 
         minx = outimgw
@@ -102,14 +104,11 @@ while(True):
         p3 = [sl[3][0]-minx,sl[3][1]-miny]
         pts2 = np.float32([p0, p1, p2, p3])
         M = cv2.getPerspectiveTransform(pts1,pts2)
-        gifwarp = cv2.warpPerspective(gifimg,M,dsize)
+        gifwarp = outimg[miny:maxy, minx:maxx]
+        cv2.warpPerspective(gifimg,M,dsize, dst=gifwarp, borderMode=cv2.BORDER_TRANSPARENT)
         gifwarph,gifwarpw,gifwarpd = gifwarp.shape
         
-      
-        #gifwarp = cv2.cvtColor(gifwarp, cv2.CV_8UC4) #Add alpha channel
-        #print gifwarp.shape
-        
-        
+        # Insert the GIF frame
         x,y = findCenter(symbol.location)
         x -= gifwarpw/2
         y -= gifwarph/2
