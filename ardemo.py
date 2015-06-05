@@ -79,26 +79,7 @@ while(True):
         #print symbol.location
         drawBorder(outimg, symbol.location, colorCode[1], 2)
         
-        # Insert the GIF frame
-        #x,y = findCenter(symbol.location)
-        #x -= gifimgw/2
-        #y -= gifimgh/2
-        #gx0 = 0
-        #gx1 = gifimgw
-        #gy0 = 0
-        #gy1 = gifimgh
-        #if x+gifimgw > outimgw:
-        #    gx1 = outimgw - x
-        #if x < 0:
-        #    x = 0
-        #    gx0 = 0
-        #if y+gifimgh > outimgh:
-        #    gy1 = outimgh - y
-        #if y < 0:
-        #    y = 0
-        #    gy0 = 0
-        #outimg[y:(y+gy1), x:(x+gx1)] = gifimg[gy0:gy1, gx0:gx1]
-        
+        # Warp & Insert the GIF frame
         maxx = 0
         maxy = 0 
         minx = outimgw
@@ -114,18 +95,39 @@ while(True):
                 miny = pt[1]
         dsize = (maxx-minx, maxy-miny)
         pts1 = np.float32([[0,0],[0,gifimgh],[gifimgw,gifimgh],[gifimgw,0]])
-        #pts2 = np.float32([[0,0],[0,dsize[1]],[dsize[0],dsize[1]],[dsize[0],0]])
         sl = symbol.location
-        pts2 = np.float32([[sl[0][0]-minx,sl[0][1]-miny], [sl[1][0]-minx,sl[1][1]-miny], [sl[2][0]-minx,sl[2][1]-miny], [sl[3][0]-minx,sl[3][1]-miny]])
-        
+        p0 = [sl[0][0]-minx,sl[0][1]-miny]
+        p1 = [sl[1][0]-minx,sl[1][1]-miny]
+        p2 = [sl[2][0]-minx,sl[2][1]-miny]
+        p3 = [sl[3][0]-minx,sl[3][1]-miny]
+        pts2 = np.float32([p0, p1, p2, p3])
         M = cv2.getPerspectiveTransform(pts1,pts2)
-        #print maxx-minx, maxy-miny
-        #dsize = (gifimgw, gifimgh)
-        outimg = cv2.warpPerspective(gifimg,M,dsize)
-        #gifh, gifw, gifd = gifwarp.shape
-        #print gifwarp.shape
-        #outimg[y:(y+gifh),x:(x+gifw)] = gifwarp
+        gifwarp = cv2.warpPerspective(gifimg,M,dsize)
+        gifwarph,gifwarpw,gifwarpd = gifwarp.shape
         
+      
+        gifwarp = cv2.cvtColor(gifwarp, cv2.CV_8UC4) #Add alpha channel
+        print gifwarp.shape
+        
+        
+        x,y = findCenter(symbol.location)
+        x -= gifwarpw/2
+        y -= gifwarph/2
+        gx0 = 0
+        gx1 = gifwarpw
+        gy0 = 0
+        gy1 = gifwarph
+        if x+gifwarpw > outimgw:
+            gx1 = outimgw - x
+        if x < 0:
+            x = 0
+            gx0 = 0
+        if y+gifwarph > outimgh:
+            gy1 = outimgh - y
+        if y < 0:
+            y = 0
+            gy0 = 0
+        outimg[y:(y+gy1), x:(x+gx1)] = gifwarp[gy0:gy1, gx0:gx1]
     # Display the resulting frame
     cv2.imshow('AR_Demo', outimg)
     
