@@ -25,64 +25,84 @@ scanner = zbar.ImageScanner()
 scanner.set_config(0, zbar.Config.ENABLE, 0) #disable all symbols
 scanner.set_config(zbar.Symbol.QRCODE, zbar.Config.ENABLE, 1) #enable QR codes
 
+def dist(p0, p1):
+    return math.sqrt((p0[0] - p1[0])**2 + (p0[1] - p1[1])**2)
 
-def gif2bgr(gifimg):
-    gifframe = np.array(gifimg)
-    if len(gifframe.shape) == 2:
-        gifframe = cv2.cvtColor(gifframe, cv2.COLOR_GRAY2BGR) 
-    return gifframe
-gifimg = Image.open("gifs/surprise-kitten.gif")
-gifframe = gif2bgr(gifimg)
-gifframeindex = 0
+def findCenter(pts):
+    x = 0
+    y = 0
+    for i in range(0,len(pts)):
+        x += pts[i][0]
+        y += pts[i][1]
+    return (int(x/len(pts)), int(y/len(pts)))
+    
+def gif2img(g):
+    img = np.array(g)
+    if len(img.shape) == 2:
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR) 
+    return img
+
+    
+gif = Image.open("gifs/surprise-kitten.gif")
+gifimg = gif2img(gif)
+gifidx = 0
 
 
 print
-print "Q to exit."
+print "Q or Esc to exit."
 print
 
 while(True):
-    # Capture a frame
-    ret, outputframe = cap.read()
+    # Capture a frame from the camera, and get it's shape.
+    ret, outimg = cap.read()    
+    outimgh, outimgw, outimgd = outimg.shape
 
-    height, width, depth = outputframe.shape
-
+    # Get the next frame of the GIF.
     try:
-        gifimg.seek(gifframeindex)
-        gifframe = gif2bgr(gifimg)
-        gifframeindex += 1
+        gif.seek(gifidx)
+        gifimg = gif2img(gif)
+        gifidx += 1
     except EOFError:
-        gifframeindex = 0
-        gifimg.seek(gifframeindex)
-        gifframe = gif2bgr(gifimg)
-    
-    gifheight, gifwidth, gifdepth = gifframe.shape
+        gifidx = 0
+        gif.seek(gifidx)
+        gifimg = gif2img(gif)
+    gifimgh, gifimgw, gifimgd = gifimg.shape
         
     # Our operations on the frame come here
-    gray = cv2.cvtColor(outputframe, cv2.COLOR_BGR2GRAY) #convert to grayscale
-    image = zbar.Image(width, height, 'Y800', gray.tostring())
-    scanner.scan(image)
-    for symbol in image:
+    gray = cv2.cvtColor(outimg, cv2.COLOR_BGR2GRAY) #convert to grayscale
+    zbarimage = zbar.Image(outimgw, outimgh, 'Y800', gray.tostring())
+    scanner.scan(zbarimage)
+    for symbol in zbarimage:
         #print 'decoded', symbol.type, 'symbol', '"%s"' % symbol.data
-        print symbol.location
-        drawBorder(outputframe, symbol.location, colorCode[0], 2)
+        #print symbol.location
+        drawBorder(outimg, symbol.location, colorCode[1], 2)
+        
+        
+        
         # Insert the GIF frame
-        x = symbol.location[0][0]
-        y = symbol.location[0][1]
-        #outputframe[y:(y+gifheight),x:(x+gifwidth)] = gifframe
-        pts1 = np.float32([[0,0],[0,gifheight],[gifwidth,gifheight],[gifwidth,0]])
+        x,y = findCenter(symbol.location)
+        x -= gifimgw/2
+        y -= gifimgh/2
+        if x+gifimgw > outimgw:
+            gifimgw = outimgw - x;
+        if y+gifimgh > outimgh:
+            gifimgh = outimgh - y;
+        outimg[y:(y+gifimgh), x:(x+gifimgw)] = gifimg[0:gifimgh, 0:gifimgw]
         
-                
-        pts2 = np.float32([[0,0],[gifwidth/4,gifheight*3/4],[gifwidth,gifheight],[gifwidth*3/4,gifheight/4]])
-        #pts2 = np.float32(symbol.location)  # No No No, calculate the ratios first.
-        
-        M = cv2.getPerspectiveTransform(pts1,pts2)
-        gifwarp = cv2.warpPerspective(gifframe,M,(gifwidth,gifheight))
-        gifh, gifw, gifd = gifwarp.shape
-        outputframe[y:(y+gifh),x:(x+gifw)] = gifwarp
+        #pts1 = np.float32([[0,0],[0,gifheight],[gifwidth,gifheight],[gifwidth,0]])
+        #pts2 = np.float32([[0,0],[0,gifheight],[gifwidth,gifheight],[gifwidth,0]])
+        #M = cv2.getPerspectiveTransform(pts1,pts2)
+        #gifwarp = cv2.warpPerspective(gifframe,M,(gifwidth,gifheight))
+        #gifh, gifw, gifd = gifwarp.shape
+        #print gifwarp.shape
+        #outimg[y:(y+gifh),x:(x+gifw)] = gifwarp
         
     # Display the resulting frame
-    cv2.imshow('AR_Demo', outputframe)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    cv2.imshow('AR_Demo', outimg)
+    
+    #Exit on Q or Esc
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord('q') or key ==27: 
         break
 
 # When everything done, release the capture
