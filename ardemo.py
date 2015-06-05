@@ -8,25 +8,12 @@ CV_CAP_PROP_FRAME_HEIGHT    = 4
 
 colorCode = ((255,0,0), (0,240,0), (0,0,255), (29,227,245), (224,27,217)) #Blue, Green, Red, Yellow, Purple
 
+
 def drawBorder(img, symbol, color, thickness):
     cv2.line(img, symbol[0], symbol[1], color, thickness)
     cv2.line(img, symbol[1], symbol[2], color, thickness)
     cv2.line(img, symbol[2], symbol[3], color, thickness)
     cv2.line(img, symbol[3], symbol[0], color, thickness)
-
-cap = cv2.VideoCapture(0)
-cap.set(CV_CAP_PROP_FRAME_WIDTH, 1280)
-cap.set(CV_CAP_PROP_FRAME_HEIGHT, 720)
-print cap.get(CV_CAP_PROP_FRAME_WIDTH), cap.get(CV_CAP_PROP_FRAME_HEIGHT)
-
-cv2.namedWindow('AR_Demo', cv2.WINDOW_NORMAL)
-
-scanner = zbar.ImageScanner()
-scanner.set_config(0, zbar.Config.ENABLE, 0) #disable all symbols
-scanner.set_config(zbar.Symbol.QRCODE, zbar.Config.ENABLE, 1) #enable QR codes
-
-def dist(p0, p1):
-    return math.sqrt((p0[0] - p1[0])**2 + (p0[1] - p1[1])**2)
 
 def findCenter(pts):
     x = 0
@@ -42,14 +29,28 @@ def gif2img(g):
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR) 
     return img
 
-    
+def dist(p0, p1):
+    return math.sqrt((p0[0] - p1[0])**2 + (p0[1] - p1[1])**2)
+
+        
+cap = cv2.VideoCapture(0)
+cap.set(CV_CAP_PROP_FRAME_WIDTH, 1280)
+cap.set(CV_CAP_PROP_FRAME_HEIGHT, 720)
+print
+print "\tResolution:",int(cap.get(CV_CAP_PROP_FRAME_WIDTH)),'x', int(cap.get(CV_CAP_PROP_FRAME_HEIGHT))
+
+cv2.namedWindow('AR_Demo', cv2.WINDOW_NORMAL)
+
+scanner = zbar.ImageScanner()
+scanner.set_config(0, zbar.Config.ENABLE, 0) #disable all symbols
+scanner.set_config(zbar.Symbol.QRCODE, zbar.Config.ENABLE, 1) #enable QR codes
+
 gif = Image.open("gifs/surprise-kitten.gif")
 gifimg = gif2img(gif)
 gifidx = 0
 
 
-print
-print "Q or Esc to exit."
+print "\tQ or Esc to exit."
 print
 
 while(True):
@@ -76,8 +77,6 @@ while(True):
         #print 'decoded', symbol.type, 'symbol', '"%s"' % symbol.data
         #print symbol.location
         drawBorder(outimg, symbol.location, colorCode[1], 2)
-        
-        
         
         # Insert the GIF frame
         x,y = findCenter(symbol.location)
