@@ -83,11 +83,19 @@ while(True):
         x,y = findCenter(symbol.location)
         x -= gifimgw/2
         y -= gifimgh/2
+        gx0 = 0
+        gx1 = gifimgw
+        gy0 = 0
+        gy1 = gifimgh
         if x+gifimgw > outimgw:
-            gifimgw = outimgw - x;
+            gx1 = outimgw - x
+        if x < 0:
+            gx0 = 0
         if y+gifimgh > outimgh:
-            gifimgh = outimgh - y;
-        outimg[y:(y+gifimgh), x:(x+gifimgw)] = gifimg[0:gifimgh, 0:gifimgw]
+            gy1 = outimgh - y
+        if y < 0:
+            gy0 = 0
+        outimg[y:(y+gy1), x:(x+gx1)] = gifimg[gy0:gy1, gx0:gx1]
         
         #pts1 = np.float32([[0,0],[0,gifheight],[gifwidth,gifheight],[gifwidth,0]])
         #pts2 = np.float32([[0,0],[0,gifheight],[gifwidth,gifheight],[gifwidth,0]])
