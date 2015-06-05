@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import zbar
+import math
 from PIL import Image
 
 CV_CAP_PROP_FRAME_WIDTH     = 3
@@ -79,35 +80,48 @@ while(True):
         drawBorder(outimg, symbol.location, colorCode[1], 2)
         
         # Insert the GIF frame
-        scalebyheight = gifimgh < gifimgw
-        qrheight = dist(symbol.location[0], symbol.location[1])
-        if scalebyheight:
-            dsize = qrheight/gifimgh
-            gifimg = cv2.resize(gifimg, dsize)
+        #x,y = findCenter(symbol.location)
+        #x -= gifimgw/2
+        #y -= gifimgh/2
+        #gx0 = 0
+        #gx1 = gifimgw
+        #gy0 = 0
+        #gy1 = gifimgh
+        #if x+gifimgw > outimgw:
+        #    gx1 = outimgw - x
+        #if x < 0:
+        #    x = 0
+        #    gx0 = 0
+        #if y+gifimgh > outimgh:
+        #    gy1 = outimgh - y
+        #if y < 0:
+        #    y = 0
+        #    gy0 = 0
+        #outimg[y:(y+gy1), x:(x+gx1)] = gifimg[gy0:gy1, gx0:gx1]
         
-        x,y = findCenter(symbol.location)
-        x -= gifimgw/2
-        y -= gifimgh/2
-        gx0 = 0
-        gx1 = gifimgw
-        gy0 = 0
-        gy1 = gifimgh
-        if x+gifimgw > outimgw:
-            gx1 = outimgw - x
-        if x < 0:
-            x = 0
-            gx0 = 0
-        if y+gifimgh > outimgh:
-            gy1 = outimgh - y
-        if y < 0:
-            y = 0
-            gy0 = 0
-        outimg[y:(y+gy1), x:(x+gx1)] = gifimg[gy0:gy1, gx0:gx1]
+        maxx = 0
+        maxy = 0 
+        minx = outimgw
+        miny = outimgh 
+        for pt in symbol.location:
+            if pt[0] > maxx:
+                maxx = pt[0]
+            if pt[0] < minx:
+                minx = pt[0]
+            if pt[1] > maxy:
+                maxy = pt[1]
+            if pt[1] < miny:
+                miny = pt[1]
+        dsize = (maxx-minx, maxy-miny)
+        pts1 = np.float32([[0,0],[0,gifimgh],[gifimgw,gifimgh],[gifimgw,0]])
+        #pts2 = np.float32([[0,0],[0,dsize[1]],[dsize[0],dsize[1]],[dsize[0],0]])
+        sl = symbol.location
+        pts2 = np.float32([[sl[0][0]-minx,sl[0][1]-miny], [sl[1][0]-minx,sl[1][1]-miny], [sl[2][0]-minx,sl[2][1]-miny], [sl[3][0]-minx,sl[3][1]-miny]])
         
-        #pts1 = np.float32([[0,0],[0,gifheight],[gifwidth,gifheight],[gifwidth,0]])
-        #pts2 = np.float32([[0,0],[0,gifheight],[gifwidth,gifheight],[gifwidth,0]])
-        #M = cv2.getPerspectiveTransform(pts1,pts2)
-        #gifwarp = cv2.warpPerspective(gifframe,M,(gifwidth,gifheight))
+        M = cv2.getPerspectiveTransform(pts1,pts2)
+        #print maxx-minx, maxy-miny
+        #dsize = (gifimgw, gifimgh)
+        outimg = cv2.warpPerspective(gifimg,M,dsize)
         #gifh, gifw, gifd = gifwarp.shape
         #print gifwarp.shape
         #outimg[y:(y+gifh),x:(x+gifw)] = gifwarp
