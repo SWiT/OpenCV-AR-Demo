@@ -21,6 +21,9 @@ This is a simple demo of an Augmented Reality concept using OpenCV, Zbar, and Py
 ###Setup
 You will want the OpenCV 2.4+ and Zbar 0.10+ packages installed along with their python packages.
 
+sudo apt-get install python-zbar libzbar-dev zbar-tools libopencv-dev
+
+
 ###Run
 ```
 python ardemo.py
