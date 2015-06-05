@@ -55,15 +55,30 @@ while(True):
         gifimg.seek(gifframeindex)
         gifframe = gif2bgr(gifimg)
     
+    gifheight, gifwidth, gifdepth = gifframe.shape
         
     # Our operations on the frame come here
     gray = cv2.cvtColor(outputframe, cv2.COLOR_BGR2GRAY) #convert to grayscale
     image = zbar.Image(width, height, 'Y800', gray.tostring())
     scanner.scan(image)
     for symbol in image:
-        print 'decoded', symbol.type, 'symbol', '"%s"' % symbol.data
+        #print 'decoded', symbol.type, 'symbol', '"%s"' % symbol.data
         print symbol.location
         drawBorder(outputframe, symbol.location, colorCode[0], 2)
+        # Insert the GIF frame
+        x = symbol.location[0][0]
+        y = symbol.location[0][1]
+        #outputframe[y:(y+gifheight),x:(x+gifwidth)] = gifframe
+        pts1 = np.float32([[0,0],[0,gifheight],[gifwidth,gifheight],[gifwidth,0]])
+        
+                
+        pts2 = np.float32([[0,0],[gifwidth/4,gifheight*3/4],[gifwidth,gifheight],[gifwidth*3/4,gifheight/4]])
+        #pts2 = np.float32(symbol.location)  # No No No, calculate the ratios first.
+        
+        M = cv2.getPerspectiveTransform(pts1,pts2)
+        gifwarp = cv2.warpPerspective(gifframe,M,(gifwidth,gifheight))
+        gifh, gifw, gifd = gifwarp.shape
+        outputframe[y:(y+gifh),x:(x+gifw)] = gifwarp
         
     # Display the resulting frame
     cv2.imshow('AR_Demo', outputframe)
