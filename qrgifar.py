@@ -22,7 +22,7 @@ cap = cv2.VideoCapture(0)
 cap.set(CV_CAP_PROP_FRAME_WIDTH, 1280)
 cap.set(CV_CAP_PROP_FRAME_HEIGHT, 720)
 print
-print "\tResolution:",int(cap.get(CV_CAP_PROP_FRAME_WIDTH)),'x', int(cap.get(CV_CAP_PROP_FRAME_HEIGHT))
+print "Resolution:",int(cap.get(CV_CAP_PROP_FRAME_WIDTH)),'x', int(cap.get(CV_CAP_PROP_FRAME_HEIGHT))
 
 # Create the openCV window.
 windowname = "Augmented Reality Demo: Cats in QR Codes"

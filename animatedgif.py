@@ -31,7 +31,7 @@ class AnimatedGif:
         
     def open(self, filename):
         self.gif = Image.open("gifs/"+filename)
-        print "OPEN:", self.gif.format, self.gif.size, self.gif.mode
+        print "OPEN:", filename, self.gif.format, self.gif.size, self.gif.mode
         self.img = self.gif2img()   # Convert Gif to a cvImage.
         
     def gif2img(self):
