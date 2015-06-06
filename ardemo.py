@@ -39,16 +39,14 @@ scanner.set_config(0, zbar.Config.ENABLE, 0) #disable all symbols
 scanner.set_config(zbar.Symbol.QRCODE, zbar.Config.ENABLE, 1) #enable QR codes
 
 # Get the list of all gif's in the gif folder.
-gifsidx = 0
-gifslist = os.listdir("gifs")
-if len(gifslist) == 0:
+gifidx = 0
+giflist = os.listdir("gifs")
+if len(giflist) == 0:
     quit("Error:No GIF files were found in gifs/.")
+print giflist
 
 # Open the Gif.
-gifsidx += 1
-if gifsidx >= len(gifslist):
-    gifsidx = 0
-gif = animatedgif.AnimatedGif(gifslist[gifsidx])
+gif = animatedgif.AnimatedGif(giflist[gifidx])
 
 print "\tQ or Esc to exit."
 print
@@ -94,9 +92,9 @@ while(True):
         M = cv2.getPerspectiveTransform(pts1,pts2)
         # Get the destination for the warp from the output image. 
         # This is how transparency is done without alpha channel support.
-        gifwarp = outimg[miny:maxy, minx:maxx]  
-        wh,ww,wd = gifwarp.shape
-        cv2.warpPerspective(gif.img, M, dsize, dst=gifwarp, borderMode=cv2.BORDER_TRANSPARENT)
+        gif.warp = outimg[miny:maxy, minx:maxx]  
+        wh, ww, wd = gif.warp.shape
+        cv2.warpPerspective(gif.img, M, dsize, dst=gif.warp, borderMode=cv2.BORDER_TRANSPARENT)
         
         
         # Insert the GIF frame
@@ -117,7 +115,7 @@ while(True):
         if y < 0:
             y = 0
             gy0 = 0
-        outimg[y:(y+gy1), x:(x+gx1)] = gifwarp[gy0:gy1, gx0:gx1]
+        outimg[y:(y+gy1), x:(x+gx1)] = gif.warp[gy0:gy1, gx0:gx1]
         
     # Display the resulting frame
     cv2.imshow('AR_Demo', outimg)

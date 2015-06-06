@@ -39,5 +39,5 @@ class AnimatedGif:
         self.img = np.array(self.gif)
         if len(self.img.shape) < 3:
             self.img = cv2.cvtColor(self.img, cv2.COLOR_GRAY2BGR)
-        self.width,self.height,self.depth = self.img.shape
+        self.height, self.width, self.depth = self.img.shape
 
