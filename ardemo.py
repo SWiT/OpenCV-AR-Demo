@@ -9,6 +9,7 @@ import animatedgif
 CV_CAP_PROP_FRAME_WIDTH     = 3
 CV_CAP_PROP_FRAME_HEIGHT    = 4
 
+windowname = "Augmented Reality Demo: Cats in QR Codes"
 colorCode = ((255,0,0), (0,240,0), (0,0,255), (29,227,245), (224,27,217)) #Blue, Green, Red, Yellow, Purple
 
 
@@ -32,7 +33,7 @@ cap.set(CV_CAP_PROP_FRAME_HEIGHT, 720)
 print
 print "\tResolution:",int(cap.get(CV_CAP_PROP_FRAME_WIDTH)),'x', int(cap.get(CV_CAP_PROP_FRAME_HEIGHT))
 
-cv2.namedWindow('AR_Demo', cv2.WINDOW_NORMAL)
+cv2.namedWindow(windowname, cv2.WINDOW_NORMAL)
 
 scanner = zbar.ImageScanner()
 scanner.set_config(0, zbar.Config.ENABLE, 0) #disable all symbols
@@ -118,7 +119,7 @@ while(True):
         outimg[y:(y+gy1), x:(x+gx1)] = gif.warp[gy0:gy1, gx0:gx1]
         
     # Display the resulting frame
-    cv2.imshow('AR_Demo', outimg)
+    cv2.imshow(windowname, outimg)
     
     #Exit on Q or Esc
     key = cv2.waitKey(1) & 0xFF
