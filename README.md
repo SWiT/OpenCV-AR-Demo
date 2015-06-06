@@ -1,4 +1,4 @@
-OpenCV-AR-Demo
+QRGifAR: QR codes overlayed with animated Gifs as an Augmented Reality demo.
 ==============
 Copyright (C) 2015 Matthew Gary Switlik
 
@@ -16,15 +16,15 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ###About
-This is a simple demo of an Augmented Reality concept using OpenCV, Zbar, and Python.
+This is a demo of an Augmented Reality concept using OpenCV, Zbar, and Python.  It scans the video source for QR Codes and replaces them with animated gifs.
 
 ###Setup
-You will want the OpenCV 2.4+ and Zbar 0.10+ packages installed along with their python packages.
+You will want the OpenCV 2.4+ and Zbar 0.10+ packages installed along with their python packages. Add the animated gifs you want to the gifs/ subdirectory.
 
 sudo apt-get install python-zbar libzbar-dev zbar-tools libopencv-dev
 
 
 ###Run
 ```
-python ardemo.py
+python qrgifar.py
 ```
