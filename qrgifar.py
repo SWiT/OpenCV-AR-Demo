@@ -9,9 +9,7 @@ import animatedgif
 CV_CAP_PROP_FRAME_WIDTH     = 3
 CV_CAP_PROP_FRAME_HEIGHT    = 4
 
-windowname = "Augmented Reality Demo: Cats in QR Codes"
 colorCode = ((255,0,0), (0,240,0), (0,0,255), (29,227,245), (224,27,217)) #Blue, Green, Red, Yellow, Purple
-
 
 def drawBorder(img, symbol, color, thickness):
     cv2.line(img, symbol[0], symbol[1], color, thickness)
@@ -19,25 +17,21 @@ def drawBorder(img, symbol, color, thickness):
     cv2.line(img, symbol[2], symbol[3], color, thickness)
     cv2.line(img, symbol[3], symbol[0], color, thickness)
 
-def findCenter(pts):
-    x = 0
-    y = 0
-    for i in range(0,len(pts)):
-        x += pts[i][0]
-        y += pts[i][1]
-    return (int(x/len(pts)), int(y/len(pts)))      
-        
+# Initialize the camera.        
 cap = cv2.VideoCapture(0)
 cap.set(CV_CAP_PROP_FRAME_WIDTH, 1280)
 cap.set(CV_CAP_PROP_FRAME_HEIGHT, 720)
 print
 print "\tResolution:",int(cap.get(CV_CAP_PROP_FRAME_WIDTH)),'x', int(cap.get(CV_CAP_PROP_FRAME_HEIGHT))
 
+# Create the openCV window.
+windowname = "Augmented Reality Demo: Cats in QR Codes"
 cv2.namedWindow(windowname, cv2.WINDOW_NORMAL)
 
+# Initialize the Zbar scanner
 scanner = zbar.ImageScanner()
-scanner.set_config(0, zbar.Config.ENABLE, 0) #disable all symbols
-scanner.set_config(zbar.Symbol.QRCODE, zbar.Config.ENABLE, 1) #enable QR codes
+scanner.set_config(0, zbar.Config.ENABLE, 0) # Disable all symbols.
+scanner.set_config(zbar.Symbol.QRCODE, zbar.Config.ENABLE, 1) # Enable just QR codes.
 
 # Get the list of all gif's in the gif folder.
 gifidx = 0
@@ -49,9 +43,11 @@ print giflist
 # Open the Gif.
 gif = animatedgif.AnimatedGif(giflist[gifidx])
 
+# Print how to quit.
 print "\tQ or Esc to exit."
 print
 
+# Main Loop.
 while(True):
     # Capture a frame from the camera, and get it's shape.
     ret, outimg = cap.read()  
@@ -60,30 +56,31 @@ while(True):
     # Get the next frame of the GIF.
     gif.nextFrame()
         
-    # Our operations on the frame come here
+    # Convert to a RAW grayscale and scan for QR Codes.
     gray = cv2.cvtColor(outimg, cv2.COLOR_BGR2GRAY) #convert to grayscale
     zbarimage = zbar.Image(outimgw, outimgh, 'Y800', gray.tostring())
     scanner.scan(zbarimage)
     for symbol in zbarimage:
         #print 'decoded', symbol.type, 'symbol', '"%s"' % symbol.data
         #print symbol.location
+        
+        # Draw a border around detected symbols.
         drawBorder(outimg, symbol.location, colorCode[0], 2)
         
         # Warp the GIF frame
         gif.warpimg(outimg, symbol)
+        
         # Insert the warped Gif frame into the output image.
         outimg[gif.dminy:gif.dmaxy, gif.dminx:gif.dmaxx] = gif.warp
 
-        
-        
     # Display the resulting frame
     cv2.imshow(windowname, outimg)
     
-    #Exit on Q or Esc
+    # Exit on Q or Esc.
     key = cv2.waitKey(1) & 0xFF
     if key == ord('q') or key ==27: 
         break
 
-# Release the capture, destory the windows
+# Release the capture device and destory the windows.
 cap.release()
 cv2.destroyAllWindows()

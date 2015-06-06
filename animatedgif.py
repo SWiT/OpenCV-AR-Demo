@@ -5,7 +5,6 @@ from PIL import Image
 class AnimatedGif:
         
     def __init__(self, filename = -1):
-        self.frameidx = 0
         self.timelastused = 0
         self.img = 0
         self.gif = 0
@@ -25,17 +24,16 @@ class AnimatedGif:
         return
         
     def nextFrame(self):
-        self.frameidx += 1
         try:
-            self.gif.seek(self.frameidx)
+            self.gif.seek(self.gif.tell()+1)
         except EOFError:
-            self.frameidx = 0
-            self.gif.seek(self.frameidx)
+            self.gif.seek(0)
         self.gif2img()
         
     def open(self, filename = -1):
         if filename != -1:
             self.gif = Image.open("gifs/"+filename)
+            print self.gif.format, self.gif.size, self.gif.mode
         self.img = self.gif2img()   # Convert Gif to a cvImage.
 
         
