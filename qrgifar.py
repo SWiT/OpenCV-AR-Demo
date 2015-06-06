@@ -70,53 +70,11 @@ while(True):
         drawBorder(outimg, symbol.location, colorCode[0], 2)
         
         # Warp the GIF frame
-        maxx = 0
-        maxy = 0 
-        minx = outimgw
-        miny = outimgh 
-        for pt in symbol.location:
-            if pt[0] > maxx:
-                maxx = pt[0]
-            if pt[0] < minx:
-                minx = pt[0]
-            if pt[1] > maxy:
-                maxy = pt[1]
-            if pt[1] < miny:
-                miny = pt[1]
-        dsize = (maxx-minx, maxy-miny)
-        pts1 = np.float32([[0,0],[0,gif.height],[gif.width,gif.height],[gif.width,0]])
-        p0 = [symbol.location[0][0]-minx, symbol.location[0][1]-miny]
-        p1 = [symbol.location[1][0]-minx, symbol.location[1][1]-miny]
-        p2 = [symbol.location[2][0]-minx, symbol.location[2][1]-miny]
-        p3 = [symbol.location[3][0]-minx, symbol.location[3][1]-miny]
-        pts2 = np.float32([p0, p1, p2, p3])
-        M = cv2.getPerspectiveTransform(pts1,pts2)
-        # Get the destination for the warp from the output image. 
-        # This is how transparency is done without alpha channel support.
-        gif.warp = outimg[miny:maxy, minx:maxx]  
-        wh, ww, wd = gif.warp.shape
-        cv2.warpPerspective(gif.img, M, dsize, dst=gif.warp, borderMode=cv2.BORDER_TRANSPARENT)
+        gif.warpimg(outimg, symbol)
+        # Insert the warped Gif frame into the output image.
+        outimg[gif.dminy:gif.dmaxy, gif.dminx:gif.dmaxx] = gif.warp
+
         
-        
-        # Insert the GIF frame
-        x,y = findCenter(symbol.location)
-        x -= ww/2
-        y -= wh/2
-        gx0 = 0
-        gx1 = ww
-        gy0 = 0
-        gy1 = wh
-        if x+ww > outimgw:
-            gx1 = outimgw - x
-        if x < 0:
-            x = 0
-            gx0 = 0
-        if y+wh > outimgh:
-            gy1 = outimgh - y
-        if y < 0:
-            y = 0
-            gy0 = 0
-        outimg[y:(y+gy1), x:(x+gx1)] = gif.warp[gy0:gy1, gx0:gx1]
         
     # Display the resulting frame
     cv2.imshow(windowname, outimg)
