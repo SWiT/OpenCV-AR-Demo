@@ -1,8 +1,10 @@
 import numpy as np
 import cv2
 import zbar
-import math
+import math, os
 from PIL import Image
+
+import animatedgif
 
 CV_CAP_PROP_FRAME_WIDTH     = 3
 CV_CAP_PROP_FRAME_HEIGHT    = 4
@@ -22,14 +24,7 @@ def findCenter(pts):
     for i in range(0,len(pts)):
         x += pts[i][0]
         y += pts[i][1]
-    return (int(x/len(pts)), int(y/len(pts)))
-    
-def gif2img(g):
-    img = np.array(g)
-    if len(img.shape) == 2:
-        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR) 
-    return img
-        
+    return (int(x/len(pts)), int(y/len(pts)))      
         
 cap = cv2.VideoCapture(0)
 cap.set(CV_CAP_PROP_FRAME_WIDTH, 1280)
@@ -43,9 +38,17 @@ scanner = zbar.ImageScanner()
 scanner.set_config(0, zbar.Config.ENABLE, 0) #disable all symbols
 scanner.set_config(zbar.Symbol.QRCODE, zbar.Config.ENABLE, 1) #enable QR codes
 
-gif = Image.open("gifs/surprise-kitten.gif")
-gifimg = gif2img(gif)
-gifidx = 0
+# Get the list of all gif's in the gif folder.
+gifsidx = 0
+gifslist = os.listdir("gifs")
+if len(gifslist) == 0:
+    quit("Error:No GIF files were found in gifs/.")
+
+# Open the Gif.
+gifsidx += 1
+if gifsidx >= len(gifslist):
+    gifsidx = 0
+gif = animatedgif.AnimatedGif(gifslist[gifsidx])
 
 print "\tQ or Esc to exit."
 print
@@ -56,15 +59,7 @@ while(True):
     outimgh, outimgw, outimgd = outimg.shape
 
     # Get the next frame of the GIF.
-    try:
-        gif.seek(gifidx)
-        gifimg = gif2img(gif)
-        gifidx += 1
-    except EOFError:
-        gifidx = 0
-        gif.seek(gifidx)
-        gifimg = gif2img(gif)
-    gifimgh, gifimgw, gifimgd = gifimg.shape
+    gif.nextFrame()
         
     # Our operations on the frame come here
     gray = cv2.cvtColor(outimg, cv2.COLOR_BGR2GRAY) #convert to grayscale
@@ -90,31 +85,34 @@ while(True):
             if pt[1] < miny:
                 miny = pt[1]
         dsize = (maxx-minx, maxy-miny)
-        pts1 = np.float32([[0,0],[0,gifimgh],[gifimgw,gifimgh],[gifimgw,0]])
+        pts1 = np.float32([[0,0],[0,gif.height],[gif.width,gif.height],[gif.width,0]])
         p0 = [symbol.location[0][0]-minx, symbol.location[0][1]-miny]
         p1 = [symbol.location[1][0]-minx, symbol.location[1][1]-miny]
         p2 = [symbol.location[2][0]-minx, symbol.location[2][1]-miny]
         p3 = [symbol.location[3][0]-minx, symbol.location[3][1]-miny]
         pts2 = np.float32([p0, p1, p2, p3])
         M = cv2.getPerspectiveTransform(pts1,pts2)
-        gifwarp = outimg[miny:maxy, minx:maxx]
-        cv2.warpPerspective(gifimg,M,dsize, dst=gifwarp, borderMode=cv2.BORDER_TRANSPARENT)
-        gifwarph,gifwarpw,gifwarpd = gifwarp.shape
+        # Get the destination for the warp from the output image. 
+        # This is how transparency is done without alpha channel support.
+        gifwarp = outimg[miny:maxy, minx:maxx]  
+        wh,ww,wd = gifwarp.shape
+        cv2.warpPerspective(gif.img, M, dsize, dst=gifwarp, borderMode=cv2.BORDER_TRANSPARENT)
+        
         
         # Insert the GIF frame
         x,y = findCenter(symbol.location)
-        x -= gifwarpw/2
-        y -= gifwarph/2
+        x -= ww/2
+        y -= wh/2
         gx0 = 0
-        gx1 = gifwarpw
+        gx1 = ww
         gy0 = 0
-        gy1 = gifwarph
-        if x+gifwarpw > outimgw:
+        gy1 = wh
+        if x+ww > outimgw:
             gx1 = outimgw - x
         if x < 0:
             x = 0
             gx0 = 0
-        if y+gifwarph > outimgh:
+        if y+wh > outimgh:
             gy1 = outimgh - y
         if y < 0:
             y = 0
