@@ -34,7 +34,7 @@ scanner.set_config(0, zbar.Config.ENABLE, 0) # Disable all symbols.
 scanner.set_config(zbar.Symbol.QRCODE, zbar.Config.ENABLE, 1) # Enable just QR codes.
 
 # Get the list of all gif's in the gif folder.
-gifidx = 0
+gifidx = 1
 giflist = os.listdir("gifs")
 if len(giflist) == 0:
     quit("Error:No GIF files were found in gifs/.")
@@ -44,8 +44,7 @@ print giflist
 gif = animatedgif.AnimatedGif(giflist[gifidx])
 
 # Print how to quit.
-print "\tQ or Esc to exit."
-print
+print "\n\tQ or Esc to exit.\n"
 
 # Main Loop.
 while(True):
@@ -53,9 +52,6 @@ while(True):
     ret, outimg = cap.read()  
     outimgh, outimgw, outimgd = outimg.shape
 
-    # Get the next frame of the GIF.
-    gif.nextFrame()
-        
     # Convert to a RAW grayscale and scan for QR Codes.
     gray = cv2.cvtColor(outimg, cv2.COLOR_BGR2GRAY) #convert to grayscale
     zbarimage = zbar.Image(outimgw, outimgh, 'Y800', gray.tostring())
@@ -66,6 +62,9 @@ while(True):
         
         # Draw a border around detected symbols.
         drawBorder(outimg, symbol.location, colorCode[0], 2)
+        
+        # Get the next frame of the GIF.
+        gif.nextFrame()
         
         # Warp the GIF frame
         gif.warpimg(outimg, symbol)

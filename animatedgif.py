@@ -5,7 +5,6 @@ from PIL import Image
 class AnimatedGif:
         
     def __init__(self, filename = -1):
-        self.timelastused = 0
         self.img = 0
         self.gif = 0
         self.width = 0
@@ -30,18 +29,18 @@ class AnimatedGif:
             self.gif.seek(0)
         self.gif2img()
         
-    def open(self, filename = -1):
-        if filename != -1:
-            self.gif = Image.open("gifs/"+filename)
-            print self.gif.format, self.gif.size, self.gif.mode
+    def open(self, filename):
+        self.gif = Image.open("gifs/"+filename)
+        print "OPEN:", self.gif.format, self.gif.size, self.gif.mode
         self.img = self.gif2img()   # Convert Gif to a cvImage.
-
         
     def gif2img(self):
+        #self.img = np.array(self.gif.convert("RGB"))
         self.img = np.array(self.gif)
         if len(self.img.shape) < 3:
             self.img = cv2.cvtColor(self.img, cv2.COLOR_GRAY2BGR)
         self.height, self.width, self.depth = self.img.shape
+        
         
     def warpimg(self, dstimg, symbol):
         dh,dw,dd = dstimg.shape
