@@ -4,7 +4,7 @@ import zbar
 import math, os
 from PIL import Image
 
-import animatedgif
+import qrcodes
 
 CV_CAP_PROP_FRAME_WIDTH     = 3
 CV_CAP_PROP_FRAME_HEIGHT    = 4
@@ -19,10 +19,9 @@ def drawBorder(img, symbol, color, thickness):
 
 # Initialize the camera.        
 cap = cv2.VideoCapture(0)
-cap.set(CV_CAP_PROP_FRAME_WIDTH, 1280)
-cap.set(CV_CAP_PROP_FRAME_HEIGHT, 720)
-print
-print "Resolution:",int(cap.get(CV_CAP_PROP_FRAME_WIDTH)),'x', int(cap.get(CV_CAP_PROP_FRAME_HEIGHT))
+cap.set(CV_CAP_PROP_FRAME_WIDTH, 1920)
+cap.set(CV_CAP_PROP_FRAME_HEIGHT, 1080)
+print "\nResolution:",int(cap.get(CV_CAP_PROP_FRAME_WIDTH)),'x', int(cap.get(CV_CAP_PROP_FRAME_HEIGHT))
 
 # Create the openCV window.
 windowname = "Augmented Reality Demo: Cats in QR Codes"
@@ -33,18 +32,10 @@ scanner = zbar.ImageScanner()
 scanner.set_config(0, zbar.Config.ENABLE, 0) # Disable all symbols.
 scanner.set_config(zbar.Symbol.QRCODE, zbar.Config.ENABLE, 1) # Enable just QR codes.
 
-# Get the list of all gif's in the gif folder.
-gifidx = 1
-giflist = os.listdir("gifs")
-if len(giflist) == 0:
-    quit("Error:No GIF files were found in gifs/.")
-print giflist
-
-# Open the Gif.
-gif = animatedgif.AnimatedGif(giflist[gifidx])
-
 # Print how to quit.
 print "\n\tQ or Esc to exit.\n"
+
+QRCodes = qrcodes.QRCodes()
 
 # Main Loop.
 while(True):
@@ -57,12 +48,18 @@ while(True):
     zbarimage = zbar.Image(outimgw, outimgh, 'Y800', gray.tostring())
     scanner.scan(zbarimage)
     for symbol in zbarimage:
-        #print 'decoded', symbol.type, 'symbol', '"%s"' % symbol.data
-        #print symbol.location
-        
         # Draw a border around detected symbols.
         drawBorder(outimg, symbol.location, colorCode[0], 2)
         
+        # If the QR code has not been found before
+        i = QRCodes.index(symbol.data)
+        if i == -1:
+            # Add the QR Code
+            print '"%s"' % symbol.data
+            i = QRCodes.add(symbol.data)
+        gif = QRCodes.found[i].gif
+        
+            
         # Get the next frame of the GIF.
         gif.nextFrame()
         
@@ -72,6 +69,8 @@ while(True):
         # Insert the warped Gif frame into the output image.
         outimg[gif.dminy:gif.dmaxy, gif.dminx:gif.dmaxx] = gif.warp
 
+    QRCodes.removeExpired()
+    
     # Display the resulting frame
     cv2.imshow(windowname, outimg)
     
