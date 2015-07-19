@@ -9,19 +9,37 @@ import qrcodes
 CV_CAP_PROP_FRAME_WIDTH     = 3
 CV_CAP_PROP_FRAME_HEIGHT    = 4
 
-colorCode = ((255,0,0), (0,240,0), (0,0,255), (29,227,245), (224,27,217)) #Blue, Green, Red, Yellow, Purple
+# Blue, Green, Red, Yellow, Magenta, Cyan
+def colorCode(color):
+    color = color.lower()
+    if color == "blue":
+        return (255,0,0)
+    elif color == "green":
+        return (0,255,0)
+    elif color == "red":
+        return (0,0,255)
+    elif color == "yellow":
+        return (0,255,255)
+    elif color == "magenta":
+        return (255,0,255)
+    elif color == "cyan":
+        return (255,255,0)
 
-def drawBorder(img, symbol, color, thickness):
-    cv2.line(img, symbol[0], symbol[1], color, thickness)
-    cv2.line(img, symbol[1], symbol[2], color, thickness)
-    cv2.line(img, symbol[2], symbol[3], color, thickness)
-    cv2.line(img, symbol[3], symbol[0], color, thickness)
-
+def drawBorder(img, points, color, thickness):
+    for idx0,point in enumerate(points):
+        if idx0+1 >= len(points):
+            idx1 = 0
+        else:
+            idx1 = idx0+1
+        cv2.line(img, points[idx0], points[idx1], colorCode(color), thickness+3)
+        #break
+    
 # Initialize the camera.        
 cap = cv2.VideoCapture(0)
 cap.set(CV_CAP_PROP_FRAME_WIDTH, 1280)
 cap.set(CV_CAP_PROP_FRAME_HEIGHT, 720)
-print "\nResolution:",int(cap.get(CV_CAP_PROP_FRAME_WIDTH)),'x', int(cap.get(CV_CAP_PROP_FRAME_HEIGHT))
+
+print "\nResolution:", int(cap.get(CV_CAP_PROP_FRAME_WIDTH)), 'x', int(cap.get(CV_CAP_PROP_FRAME_HEIGHT))
 
 # Create the openCV window.
 windowname = "Augmented Reality Demo: Cats in QR Codes"
@@ -35,7 +53,7 @@ scanner.set_config(zbar.Symbol.QRCODE, zbar.Config.ENABLE, 1) # Enable just QR c
 # Print how to quit.
 print "\n\tQ or Esc to exit.\n"
 
-QRCodes = qrcodes.QRCodes()
+QRCodes = qrcodes.QRCodes(int(cap.get(CV_CAP_PROP_FRAME_HEIGHT)), int(cap.get(CV_CAP_PROP_FRAME_WIDTH)))
 
 # Main Loop.
 while(True):
@@ -47,12 +65,21 @@ while(True):
     gray = cv2.cvtColor(outimg, cv2.COLOR_BGR2GRAY) #convert to grayscale
     
     # Foreach QRCode already found
+    for qr in QRCodes.qrlist:
         # Scan the qrcode's roi
-        # if found
-            # update data, location, and timer
-            # blank the region of the grayscaled image where the qrcode was found.
-        # if not found
-            # expand roi
+        roi = gray[qr.roi[0][1]:qr.roi[1][1], qr.roi[0][0]:qr.roi[3][0]]
+        h,w = roi.shape
+        zbarimage = zbar.Image(w, h, 'Y800', roi.tostring())
+        scanner.scan(zbarimage)
+        for symbol in zbarimage:
+            # if found
+            if symbol.data == qr.data:
+                # update data, location, and timer
+                i = QRCodes.update(symbol.data, symbol.location)
+                # blank the region of the grayscaled image where the qrcode was found.
+                print "\"%s\" UPDATED!" % qr.data
+            # if not found
+                # expand roi
             
     
     
@@ -66,7 +93,10 @@ while(True):
         if i == -1:
             # Add the QR Code
             i = QRCodes.add(symbol.data, symbol.location)
-            
+        else:
+            pass
+            #print '"%s" updated' % symbol.data
+                
             
             
     # Output All QR Codes.
@@ -77,13 +107,24 @@ while(True):
         gif.nextFrame()
         
         # Warp the GIF frame
-        gif.warpimg(outimg, symbol)
+        gif.warpimg(outimg, qr)
         
         # Insert the warped Gif frame into the output image.
         outimg[gif.dminy:gif.dmaxy, gif.dminx:gif.dmaxx] = gif.warp
         
         # Draw a border around detected symbol.
-        drawBorder(outimg, qr.location, colorCode[0], 2)
+        if qr.data == "A":
+            color = "blue"
+        elif qr.data == "B":
+            color = "green"
+        elif qr.data == "C":
+            color = "red"
+        elif qr.data == "D":
+            color = "yellow"
+        else:
+            color = "magenta"
+        drawBorder(outimg, qr.location, color, 3)
+        drawBorder(outimg, qr.roi, "cyan", 3)
 
     # Remove Expired QRCodes
     QRCodes.removeExpired()
