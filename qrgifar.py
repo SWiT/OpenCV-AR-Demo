@@ -19,8 +19,8 @@ def drawBorder(img, symbol, color, thickness):
 
 # Initialize the camera.        
 cap = cv2.VideoCapture(0)
-cap.set(CV_CAP_PROP_FRAME_WIDTH, 1920)
-cap.set(CV_CAP_PROP_FRAME_HEIGHT, 1080)
+cap.set(CV_CAP_PROP_FRAME_WIDTH, 1280)
+cap.set(CV_CAP_PROP_FRAME_HEIGHT, 720)
 print "\nResolution:",int(cap.get(CV_CAP_PROP_FRAME_WIDTH)),'x', int(cap.get(CV_CAP_PROP_FRAME_HEIGHT))
 
 # Create the openCV window.
@@ -43,22 +43,35 @@ while(True):
     ret, outimg = cap.read()  
     outimgh, outimgw, outimgd = outimg.shape
 
-    # Convert to a RAW grayscale and scan for QR Codes.
+    # Convert to a RAW grayscale.
     gray = cv2.cvtColor(outimg, cv2.COLOR_BGR2GRAY) #convert to grayscale
+    
+    # Foreach QRCode already found
+        # Scan the qrcode's roi
+        # if found
+            # update data, location, and timer
+            # blank the region of the grayscaled image where the qrcode was found.
+        # if not found
+            # expand roi
+            
+    
+    
+    # Scan for New QR Codes.
     zbarimage = zbar.Image(outimgw, outimgh, 'Y800', gray.tostring())
     scanner.scan(zbarimage)
+    # Foreach new symbol found
     for symbol in zbarimage:
-        # Draw a border around detected symbols.
-        drawBorder(outimg, symbol.location, colorCode[0], 2)
-        
-        # If the QR code has not been found before
-        i = QRCodes.index(symbol.data)
+        # try to update the QRCode if it exists
+        i = QRCodes.update(symbol.data, symbol.location)
         if i == -1:
             # Add the QR Code
-            print '"%s"' % symbol.data
-            i = QRCodes.add(symbol.data)
-        gif = QRCodes.found[i].gif
-        
+            i = QRCodes.add(symbol.data, symbol.location)
+            
+            
+            
+    # Output All QR Codes.
+    for qr in QRCodes.qrlist:
+        gif = qr.gif
             
         # Get the next frame of the GIF.
         gif.nextFrame()
@@ -68,7 +81,11 @@ while(True):
         
         # Insert the warped Gif frame into the output image.
         outimg[gif.dminy:gif.dmaxy, gif.dminx:gif.dmaxx] = gif.warp
+        
+        # Draw a border around detected symbol.
+        drawBorder(outimg, qr.location, colorCode[0], 2)
 
+    # Remove Expired QRCodes
     QRCodes.removeExpired()
     
     # Display the resulting frame

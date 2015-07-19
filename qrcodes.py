@@ -2,14 +2,18 @@ import time, os
 import animatedgif
 
 class QRCode:
-    def __init__(self, d, fn):
+    def __init__(self, data, filename, location):
         self.timelastseen = time.time()
-        self.data = d
-        self.gif = animatedgif.AnimatedGif(fn)
+        self.data = data
+        self.filename = filename
+        self.gif = animatedgif.AnimatedGif(self.filename)
+        self.location = location
+        self.roi = []
         
 class QRCodes:
     def __init__(self):
-        self.found = []
+        self.qrlist = []
+        self.expiretime = 2
         # Get the list of all gif's in the gif folder.
         self.gifidx = 0
         self.giflist = os.listdir("gifs")
@@ -17,23 +21,27 @@ class QRCodes:
             quit("Error:No GIF files were found in gifs/.")
         print self.giflist
         
-    def index(self, val):
-        for i,qr in enumerate(self.found):
-            if qr.data == val:
+    def update(self, data, location):
+        for i,qr in enumerate(self.qrlist):
+            if qr.data == data:
                 qr.timelastseen = time.time()
+                qr.location = location
                 return i
         return -1
         
-    def add(self, val):
-        self.found.append(QRCode(val, self.giflist[self.gifidx]))
+    def add(self, data, location):
+        self.qrlist.append(QRCode(data, self.giflist[self.gifidx], location))
         self.gifidx += 1
         if self.gifidx >= len(self.giflist):
             self.gifidx = 0
-        return len(self.found)-1
+        
+        print '"%s" added' % data
+        return len(self.qrlist)-1
         
     def removeExpired(self):
-        for qr in self.found:
-            if (time.time() - qr.timelastseen) > 3:
-                self.found.remove(qr)
-                print "expired."
+        for qr in self.qrlist:
+            if (time.time() - qr.timelastseen) > self.expiretime:
+                print '"%s" expired' % qr.data
+                self.qrlist.remove(qr)
+                
             
