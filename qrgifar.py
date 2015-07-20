@@ -63,42 +63,41 @@ while(True):
     # Convert to a RAW grayscale.
     gray = cv2.cvtColor(outimg, cv2.COLOR_BGR2GRAY) #convert to grayscale
     
-    # Foreach QRCode already found
+    
+    # Foreach QRCode already found scan the qrcode's roi.
+    numfound = 0
     for qr in QRCodes.qrlist:
-        # Scan the qrcode's roi
         roi = gray[qr.ymin:qr.ymax, qr.xmin:qr.xmax]
         h,w = roi.shape
         zbarimage = zbar.Image(w, h, 'Y800', roi.tostring())
         scanner.scan(zbarimage)
         for symbol in zbarimage:
-            # if found
+            # If found update with offset.
             if symbol.data == qr.data:
-                # update data, location, and timer
                 i = QRCodes.update(symbol.data, symbol.location, True)
+                numfound += 1
                 #print "\"%s\" UPDATED!" % qr.data
                 
-                # blank the region of the grayscaled image where the qrcode was found.
+                # Blank the region of the grayscaled image where the qrcode was found.
                 poly = np.array(qr.location, np.int32)
                 cv2.fillConvexPoly(gray, poly, 0)
             
-            # if not found
-                # expand roi
+
             
-    
-    
-    # Scan for New QR Codes.
-    zbarimage = zbar.Image(outimgw, outimgh, 'Y800', gray.tostring())
-    scanner.scan(zbarimage)
-    # Foreach new symbol found
-    for symbol in zbarimage:
-        # try to update the QRCode if it exists
-        i = QRCodes.update(symbol.data, symbol.location)
-        if i == -1:
-            # Add the QR Code
-            i = QRCodes.add(symbol.data, symbol.location)
-        else:
-            #print '"%s" updated' % symbol.data
-            pass
+    # If too few QR Codes were found Scan for new QR Codes.
+    if numfound < 2:
+        zbarimage = zbar.Image(outimgw, outimgh, 'Y800', gray.tostring())
+        scanner.scan(zbarimage)
+        # Foreach new symbol found
+        for symbol in zbarimage:
+            # try to update the QRCode if it exists
+            i = QRCodes.update(symbol.data, symbol.location)
+            if i == -1:
+                # Add the QR Code
+                i = QRCodes.add(symbol.data, symbol.location)
+            else:
+                #print '"%s" updated' % symbol.data
+                pass
                 
             
             
