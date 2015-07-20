@@ -111,7 +111,7 @@ while(True):
         # Warp the GIF frame and insert the warped Gif into the output image.
         gif.warpimg(outimg, qr)
         
-        # Draw a border around detected symbol.
+        # Draw a border around symbol.
         if qr.data == "A":
             color = "blue"
         elif qr.data == "B":
@@ -122,8 +122,8 @@ while(True):
             color = "yellow"
         else:
             color = "magenta"
-        drawBorder(outimg, qr.location, color, 4)
-        drawBorder(outimg, qr.roi, "cyan", 2)
+        drawBorder(outimg, qr.location, color, 3)
+        drawBorder(outimg, qr.roi, "cyan", 1)
 
     # Remove Expired QRCodes
     QRCodes.removeExpired()

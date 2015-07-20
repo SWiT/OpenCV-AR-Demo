@@ -66,7 +66,7 @@ class QRCode:
 class QRCodes:
     def __init__(self, imgh, imgw):
         self.qrlist = []
-        self.expiretime = 2
+        self.expiretime = 1
         self.imgh = imgh
         self.imgw = imgw
         # Get the list of all gif's in the gif folder.
@@ -90,13 +90,13 @@ class QRCodes:
         self.gifidx += 1
         if self.gifidx >= len(self.giflist):
             self.gifidx = 0        
-        print '"%s" added' % data
+        #print '"%s" added' % data
         return len(self.qrlist)-1
         
     def removeExpired(self):
         for qr in self.qrlist:
             if (time.time() - qr.timelastseen) > self.expiretime:
-                print '"%s" expired' % qr.data
+                #print '"%s" expired' % qr.data
                 self.qrlist.remove(qr)
                 
             
