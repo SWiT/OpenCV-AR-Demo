@@ -31,8 +31,7 @@ def drawBorder(img, points, color, thickness):
             idx1 = 0
         else:
             idx1 = idx0+1
-        cv2.line(img, points[idx0], points[idx1], colorCode(color), thickness+3)
-        #break
+        cv2.line(img, points[idx0], points[idx1], colorCode(color), thickness)
     
 # Initialize the camera.        
 cap = cv2.VideoCapture(0)
@@ -67,7 +66,7 @@ while(True):
     # Foreach QRCode already found
     for qr in QRCodes.qrlist:
         # Scan the qrcode's roi
-        roi = gray[qr.roi[0][1]:qr.roi[1][1], qr.roi[0][0]:qr.roi[3][0]]
+        roi = gray[qr.ymin:qr.ymax, qr.xmin:qr.xmax]
         h,w = roi.shape
         zbarimage = zbar.Image(w, h, 'Y800', roi.tostring())
         scanner.scan(zbarimage)
@@ -75,9 +74,13 @@ while(True):
             # if found
             if symbol.data == qr.data:
                 # update data, location, and timer
-                i = QRCodes.update(symbol.data, symbol.location)
+                i = QRCodes.update(symbol.data, symbol.location, True)
+                #print "\"%s\" UPDATED!" % qr.data
+                
                 # blank the region of the grayscaled image where the qrcode was found.
-                print "\"%s\" UPDATED!" % qr.data
+                poly = np.array(qr.location, np.int32)
+                cv2.fillConvexPoly(gray, poly, 0)
+            
             # if not found
                 # expand roi
             
@@ -94,23 +97,19 @@ while(True):
             # Add the QR Code
             i = QRCodes.add(symbol.data, symbol.location)
         else:
-            pass
             #print '"%s" updated' % symbol.data
+            pass
                 
             
             
     # Output All QR Codes.
     for qr in QRCodes.qrlist:
+        # Get the QRCode's GIF
         gif = qr.gif
-            
         # Get the next frame of the GIF.
         gif.nextFrame()
-        
-        # Warp the GIF frame
+        # Warp the GIF frame and insert the warped Gif into the output image.
         gif.warpimg(outimg, qr)
-        
-        # Insert the warped Gif frame into the output image.
-        outimg[gif.dminy:gif.dmaxy, gif.dminx:gif.dmaxx] = gif.warp
         
         # Draw a border around detected symbol.
         if qr.data == "A":
@@ -123,8 +122,8 @@ while(True):
             color = "yellow"
         else:
             color = "magenta"
-        drawBorder(outimg, qr.location, color, 3)
-        drawBorder(outimg, qr.roi, "cyan", 3)
+        drawBorder(outimg, qr.location, color, 4)
+        drawBorder(outimg, qr.roi, "cyan", 2)
 
     # Remove Expired QRCodes
     QRCodes.removeExpired()
