@@ -11,14 +11,18 @@ class QRCode:
         self.imgw = imgw
         # 0:top left, 1:bottom left, 2:bottom right, 3: top right
         # (x, y)
-        self.location = []  
+        self.location = []
         self.roi = []
         self.xmin = 0
         self.xmax = 0
         self.ymin = 0
         self.ymax = 0
+        self.vx = 0
+        self.vy = 0
+        self.com = (0,0)  
+        
         self.updatelocation(location, useOffset)
-    
+        
     
     def updatelocation(self, location, useOffset):    
         if useOffset:
@@ -28,7 +32,7 @@ class QRCode:
             self.location = ((l[0][0]+x,l[0][1]+y),(l[1][0]+x,l[1][1]+y),(l[2][0]+x,l[2][1]+y),(l[3][0]+x,l[3][1]+y))
         else:
             self.location = location
-            
+        
         # Calculate region of interest.
         xmin = self.imgw
         xmax = 0
@@ -61,6 +65,12 @@ class QRCode:
         self.ymin = ymin
         self.xmax = xmax
         self.ymax = ymax
+        
+        # Calculate velocities and center of mass.
+        prevcom = self.com
+        self.com = ((xmax + xmin)/2, (ymax + ymin)/2)
+        self.vx = self.com[0]-prevcom[0]
+        self.vy = self.com[1]-prevcom[1]
         
         
 class QRCodes:

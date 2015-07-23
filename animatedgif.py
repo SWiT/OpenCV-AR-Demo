@@ -1,4 +1,4 @@
-import numpy as np
+import numpy
 import cv2
 from PIL import Image
 
@@ -35,8 +35,8 @@ class AnimatedGif:
         self.img = self.gif2img()   # Convert Gif to a cvImage.
         
     def gif2img(self):
-        #self.img = np.array(self.gif.convert("RGB"))
-        self.img = np.array(self.gif)
+        #self.img = numpy.array(self.gif.convert("RGB"))
+        self.img = numpy.array(self.gif)
         if len(self.img.shape) < 3:
             self.img = cv2.cvtColor(self.img, cv2.COLOR_GRAY2BGR)
         self.height, self.width, self.depth = self.img.shape
@@ -58,12 +58,12 @@ class AnimatedGif:
             if pt[1] < self.dminy:
                 self.dminy = pt[1]
         dsize = (self.dmaxx-self.dminx, self.dmaxy-self.dminy)
-        pts1 = np.float32([[0,0],[0,self.height],[self.width,self.height],[self.width,0]])
+        pts1 = numpy.float32([[0,0],[0,self.height],[self.width,self.height],[self.width,0]])
         p0 = [symbol.location[0][0]-self.dminx, symbol.location[0][1]-self.dminy]
         p1 = [symbol.location[1][0]-self.dminx, symbol.location[1][1]-self.dminy]
         p2 = [symbol.location[2][0]-self.dminx, symbol.location[2][1]-self.dminy]
         p3 = [symbol.location[3][0]-self.dminx, symbol.location[3][1]-self.dminy]
-        pts2 = np.float32([p0, p1, p2, p3])
+        pts2 = numpy.float32([p0, p1, p2, p3])
         M = cv2.getPerspectiveTransform(pts1,pts2)
         # Get the destination for the warp from the output image. 
         # This is how transparency is done without alpha channel support.

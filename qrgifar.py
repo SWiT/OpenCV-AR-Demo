@@ -1,10 +1,11 @@
-import numpy as np
+import numpy
 import cv2
 import zbar
 import math, os
 from PIL import Image
 
 import qrcodes
+import game
 
 CV_CAP_PROP_FRAME_WIDTH     = 3
 CV_CAP_PROP_FRAME_HEIGHT    = 4
@@ -37,8 +38,9 @@ def drawBorder(img, points, color, thickness):
 cap = cv2.VideoCapture(0)
 cap.set(CV_CAP_PROP_FRAME_WIDTH, 1280)
 cap.set(CV_CAP_PROP_FRAME_HEIGHT, 720)
-
-print "\nResolution:", int(cap.get(CV_CAP_PROP_FRAME_WIDTH)), 'x', int(cap.get(CV_CAP_PROP_FRAME_HEIGHT))
+outimgw = int(cap.get(CV_CAP_PROP_FRAME_WIDTH))
+outimgh = int(cap.get(CV_CAP_PROP_FRAME_HEIGHT))
+print "\nResolution:", outimgw, 'x', outimgh
 
 # Create the openCV window.
 windowname = "Augmented Reality Demo: Cats in QR Codes"
@@ -54,6 +56,8 @@ print "\n\tQ or Esc to exit.\n"
 
 QRCodes = qrcodes.QRCodes(int(cap.get(CV_CAP_PROP_FRAME_HEIGHT)), int(cap.get(CV_CAP_PROP_FRAME_WIDTH)))
 
+ball = game.Ball((outimgw/2, outimgh/2), colorCode("magenta"))
+        
 # Main Loop.
 while(True):
     # Capture a frame from the camera, and get it's shape.
@@ -79,7 +83,7 @@ while(True):
                 #print "\"%s\" UPDATED!" % qr.data
                 
                 # Blank the region of the grayscaled image where the qrcode was found.
-                poly = np.array(qr.location, np.int32)
+                poly = numpy.array(qr.location, numpy.int32)
                 cv2.fillConvexPoly(gray, poly, 0)
             
             
@@ -124,6 +128,9 @@ while(True):
         drawBorder(outimg, qr.location, color, 6)
         drawBorder(outimg, qr.roi, "cyan", 1)
   
+    # Draw the Ball
+    ball.checkcollision(QRCodes)
+    ball.draw(outimg)
     
     # Display the resulting frame
     cv2.imshow(windowname, outimg)
