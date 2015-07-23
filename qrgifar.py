@@ -123,16 +123,7 @@ while(True):
             color = "magenta"
         drawBorder(outimg, qr.location, color, 6)
         drawBorder(outimg, qr.roi, "cyan", 1)
-
-    # Draw Circle
-    pt = (300,300)
-    color = (0,0,255)
-    cv2.circle(outimg, (pt[0],pt[1]), 18, color, -1)
-    cv2.circle(outimg, (pt[0]+34,pt[1]), 18, color, -1)
-    poly = ((pt[0]-17,pt[1]),(pt[0]+34,pt[1]),(pt[0]+18,pt[1]+50))
-    poly = np.array(poly, np.int32)
-    cv2.fillConvexPoly(outimg, poly, color)
-    
+  
     
     # Display the resulting frame
     cv2.imshow(windowname, outimg)
