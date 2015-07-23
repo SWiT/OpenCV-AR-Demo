@@ -82,7 +82,6 @@ while(True):
                 poly = np.array(qr.location, np.int32)
                 cv2.fillConvexPoly(gray, poly, 0)
             
-
             
     # If too few QR Codes were found Scan for new QR Codes.
     if numfound < 2:
@@ -99,8 +98,9 @@ while(True):
                 #print '"%s" updated' % symbol.data
                 pass
                 
-            
-            
+    # Remove Expired QRCodes
+    QRCodes.removeExpired()
+    
     # Output All QR Codes.
     for qr in QRCodes.qrlist:
         # Get the QRCode's GIF
@@ -121,11 +121,18 @@ while(True):
             color = "yellow"
         else:
             color = "magenta"
-        drawBorder(outimg, qr.location, color, 3)
+        drawBorder(outimg, qr.location, color, 6)
         drawBorder(outimg, qr.roi, "cyan", 1)
 
-    # Remove Expired QRCodes
-    QRCodes.removeExpired()
+    # Draw Circle
+    pt = (300,300)
+    color = (0,0,255)
+    cv2.circle(outimg, (pt[0],pt[1]), 18, color, -1)
+    cv2.circle(outimg, (pt[0]+34,pt[1]), 18, color, -1)
+    poly = ((pt[0]-17,pt[1]),(pt[0]+34,pt[1]),(pt[0]+18,pt[1]+50))
+    poly = np.array(poly, np.int32)
+    cv2.fillConvexPoly(outimg, poly, color)
+    
     
     # Display the resulting frame
     cv2.imshow(windowname, outimg)

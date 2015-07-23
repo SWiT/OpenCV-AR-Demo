@@ -43,7 +43,7 @@ class QRCode:
                 ymax = point[1]
             if point[1] < ymin:
                 ymin = point[1]
-        diff = 90
+        diff = 100
         ymax += diff
         if ymax >= self.imgh:
             ymax = self.imgh-1
@@ -66,7 +66,7 @@ class QRCode:
 class QRCodes:
     def __init__(self, imgh, imgw):
         self.qrlist = []
-        self.expiretime = 1
+        self.expiretime = 3
         self.imgh = imgh
         self.imgw = imgw
         # Get the list of all gif's in the gif folder.
