@@ -84,7 +84,7 @@ class QRCodes:
         self.giflist = os.listdir("gifs")
         if len(self.giflist) == 0:
             quit("Error:No GIF files were found in gifs/.")
-        print self.giflist,"\n"
+        #print self.giflist,"\n"
         
     def update(self, data, location, useOffset = False):
         for i,qr in enumerate(self.qrlist):

@@ -71,7 +71,6 @@ while(True):
     # Convert to a RAW grayscale.
     gray = cv2.cvtColor(outimg, cv2.COLOR_BGR2GRAY) #convert to grayscale
     
-    
     # Foreach QRCode already found scan the qrcode's roi.
     numfound = 0
     for qr in QRCodes.qrlist:
@@ -102,9 +101,6 @@ while(True):
             if i == -1:
                 # Add the QR Code
                 i = QRCodes.add(symbol.data, symbol.location)
-            else:
-                #print '"%s" updated' % symbol.data
-                pass
                 
     # Remove Expired QRCodes
     QRCodes.removeExpired()
@@ -130,16 +126,10 @@ while(True):
         else:
             color = "magenta"
         drawBorder(outimg, qr.location, color, 6)
+        
+        # Draw the symbol's region of interest.
         drawBorder(outimg, qr.roi, "cyan", 1)
         
-        l = qr.location
-        t = []
-        
-        dx = l[3][0]-l[0][0]
-        dy = l[3][1]-l[0][1]
-        t.append((l[0][0]-dx, l[0][1]-dy))
-        #cv2.line(outimg, l[0], t0, colorCode(color), 2)
-  
     # Draw the Ball
     ball.move()
     ball.checkcollision(QRCodes, scores)
