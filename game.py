@@ -62,7 +62,7 @@ class Ball:
     
     def collisionwithqr(self, qr):
         # Collision! Calculate new ball velocities.
-        print "QR Collision!"
+        print "QR Collision with \""+qr.data+"\""
         maxv = 25
         self.vx = int(qr.vx) + -1*self.vx
         if abs(self.vx) > maxv:

@@ -141,10 +141,11 @@ while(True):
     outimg = cv2.flip(outimg,1);
     
     # Draw the scores and message.
-    cv2.putText(outimg, str(scores.score1), (25,100), cv2.FONT_HERSHEY_SIMPLEX, 3.5, colorCode("magenta"), 4)
-    cv2.putText(outimg, str(scores.score2), (outimgw-125,100), cv2.FONT_HERSHEY_SIMPLEX, 3.5, colorCode("magenta"), 4)
+    font = cv2.FONT_HERSHEY_COMPLEX
+    cv2.putText(outimg, str(scores.score1), (25,100), font, 3.5, colorCode("magenta"), 4)
+    cv2.putText(outimg, str(scores.score2), (outimgw-125,100), font, 3.5, colorCode("magenta"), 4)
     if not scores.message.expired():
-        cv2.putText(outimg, scores.message.text, (outimgw/2-400,300), cv2.FONT_HERSHEY_SIMPLEX, 4.0, colorCode("magenta"), 8)
+        cv2.putText(outimg, scores.message.text, (outimgw/2-450,300), font, 4.0, colorCode("magenta"), 8)
     
     
     # Display the resulting frame
