@@ -4,10 +4,12 @@ import math
 
 
 class Ball:
-    def __init__(self, pt, color):
+    def __init__(self, pt, color, imgw, imgh):
         self.radius = 25
         self.pt = pt
         self.color = color
+        self.imgw = imgw
+        self.imgh = imgh
         self.vx = 0
         self.vy = 0
         
@@ -25,13 +27,23 @@ class Ball:
         # Use velocity to calculate new position.
         self.pt = (self.pt[0] + self.vx, self.pt[1] + self.vy)
     
+    def collision(self, qr):
+        # Collision! Calculate new ball velocities.
+        self.vx = qr.vx + self.vx
+        self.vy = qr.vy + self.vy
+        #print "Collision",self.vx,self.vy
+    
+    
     # Check if any of the line segments intersect with the circle.
     # http://math.stackexchange.com/questions/228841/how-do-i-calculate-the-intersections-of-a-straight-line-and-a-circle    
     # http://math.stackexchange.com/questions/2837/how-to-tell-if-a-line-segment-intersects-with-a-circle
     # http://math.stackexchange.com/questions/2837/how-to-tell-if-a-line-segment-intersects-with-a-circle/2844#2844
     def checkcollision(self, QRCodes):
         # Check for collision with image edges.
-        
+        if self.pt[0] < (0 + self.radius) or (self.imgw - self.radius) < self.pt[0]:
+            print "past X"
+            self.setpos(self.imgw/2, self.imgh/2)
+            self.stop()
         
         # Check for collision with QR code.
         for qr in QRCodes.qrlist:
@@ -69,10 +81,7 @@ class Ball:
                     x_2 = (-B - math.sqrt(discriminant))/(2*A)
                     y_2 = m*x_2 + c
                     if (x1 <= x_1 <= x2) or (x1>= x_1 >= x2) or (x1 <= x_2 <= x2) or (x1>= x_2 >= x2):
-                        # Collision! Calculate new ball velocities.
-                        self.vx = qr.vx - self.vx
-                        self.vy = qr.vy - self.vy
-                        print "Collision",self.vx,self.vy
+                        self.collision(qr)
                     
             #print
             

@@ -56,7 +56,7 @@ print "\n\tQ or Esc to exit.\n"
 
 QRCodes = qrcodes.QRCodes(int(cap.get(CV_CAP_PROP_FRAME_HEIGHT)), int(cap.get(CV_CAP_PROP_FRAME_WIDTH)))
 
-ball = game.Ball((outimgw/2, outimgh/2), colorCode("magenta"))
+ball = game.Ball((outimgw/2, outimgh/2), colorCode("magenta"), outimgw, outimgh)
         
 # Main Loop.
 while(True):
@@ -129,18 +129,20 @@ while(True):
         drawBorder(outimg, qr.roi, "cyan", 1)
         
         l = qr.location
+        t = []
+        
         dx = l[3][0]-l[0][0]
         dy = l[3][1]-l[0][1]
-        t0 = (l[0][0]-dx, l[0][1]-dy)
-        cv2.line(outimg, l[0], t0, colorCode(color), 2)
+        t.append((l[0][0]-dx, l[0][1]-dy))
+        #cv2.line(outimg, l[0], t0, colorCode(color), 2)
   
     # Draw the Ball
-    ball.checkcollision(QRCodes)
     ball.move()
+    ball.checkcollision(QRCodes)
     ball.draw(outimg)
     
     # Mirror flip the output image.
-    outimg = cv2.flip(outimg,1);
+    #outimg = cv2.flip(outimg,1);
     
     # Display the resulting frame
     cv2.imshow(windowname, outimg)
