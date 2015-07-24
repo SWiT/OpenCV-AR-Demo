@@ -58,16 +58,16 @@ class Ball:
             
     def move(self):
         # Use velocity (in pixels per frame) to calculate new position.
-        self.pt = (self.pt[0] + self.vx, self.pt[1] + self.vy)
+        self.pt = (int(self.pt[0] + self.vx), int(self.pt[1] + self.vy))
     
     def collisionwithqr(self, qr):
         # Collision! Calculate new ball velocities.
         print "QR Collision!"
         maxv = 25
-        self.vx = qr.vx + -1*self.vx
+        self.vx = int(qr.vx) + -1*self.vx
         if abs(self.vx) > maxv:
             self.vx = math.copysign(maxv, self.vx)
-        self.vy = qr.vy + self.vy
+        self.vy = int(qr.vy) + self.vy
         if abs(self.vy) > maxv:
             self.vy = math.copysign(maxv, self.vy)
         
