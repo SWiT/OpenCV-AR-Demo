@@ -76,7 +76,7 @@ class QRCode:
 class QRCodes:
     def __init__(self, imgh, imgw):
         self.qrlist = []
-        self.expiretime = 3
+        self.expiretime = 2
         self.imgh = imgh
         self.imgw = imgw
         # Get the list of all gif's in the gif folder.

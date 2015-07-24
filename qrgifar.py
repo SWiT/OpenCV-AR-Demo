@@ -129,7 +129,7 @@ while(True):
         drawBorder(outimg, qr.location, color, 6)
         
         # Draw the symbol's region of interest.
-        drawBorder(outimg, qr.roi, "cyan", 1)
+        #drawBorder(outimg, qr.roi, "cyan", 1)
         
     # Draw the Ball
     ball.move()
