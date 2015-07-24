@@ -85,7 +85,6 @@ while(True):
             if symbol.data == qr.data:
                 i = QRCodes.update(symbol.data, symbol.location, True)
                 numfound += 1
-                #print "\"%s\" UPDATED!" % qr.data
                 
                 # Blank the region of the grayscaled image where the qrcode was found.
                 poly = numpy.array(qr.location, numpy.int32)
@@ -153,7 +152,7 @@ while(True):
     
     # Exit on Q or Esc.
     key = cv2.waitKey(1) & 0xFF
-    if key == ord('q') or key ==27: 
+    if key == ord('q') or key == ord('Q') or key ==27: 
         break
     # Reset game on 'spacebar' press.
     if key == ord(' '):
