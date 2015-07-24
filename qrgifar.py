@@ -19,6 +19,8 @@ def colorCode(color):
         return (0,255,0)
     elif color == "red":
         return (0,0,255)
+    elif color == "darkred":
+        return (0,0,190)
     elif color == "yellow":
         return (0,255,255)
     elif color == "magenta":
@@ -118,11 +120,11 @@ while(True):
         if qr.data == "A":
             color = "blue"
         elif qr.data == "B":
-            color = "green"
-        elif qr.data == "C":
-            color = "purple"
-        elif qr.data == "D":
             color = "yellow"
+        elif qr.data == "C":
+            color = "green"
+        elif qr.data == "D":
+            color = "darkred"
         else:
             color = "magenta"
         drawBorder(outimg, qr.location, color, 6)

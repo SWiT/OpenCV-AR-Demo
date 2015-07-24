@@ -62,8 +62,14 @@ class Ball:
     
     def collisionwithqr(self, qr):
         # Collision! Calculate new ball velocities.
-        self.vx = qr.vx + self.vx
+        print "QR Collision!"
+        maxv = 25
+        self.vx = qr.vx + -1*self.vx
+        if abs(self.vx) > maxv:
+            self.vx = math.copysign(maxv, self.vx)
         self.vy = qr.vy + self.vy
+        if abs(self.vy) > maxv:
+            self.vy = math.copysign(maxv, self.vy)
         
         
     # Check if any of the line segments intersect with the circle.
