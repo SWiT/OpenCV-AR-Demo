@@ -88,7 +88,7 @@ while(True):
             
             
     # If too few QR Codes were found Scan for new QR Codes.
-    if numfound < 2:
+    if numfound < 1:
         zbarimage = zbar.Image(outimgw, outimgh, 'Y800', gray.tostring())
         scanner.scan(zbarimage)
         # Foreach new symbol found
@@ -127,10 +127,20 @@ while(True):
             color = "magenta"
         drawBorder(outimg, qr.location, color, 6)
         drawBorder(outimg, qr.roi, "cyan", 1)
+        
+        l = qr.location
+        dx = l[3][0]-l[0][0]
+        dy = l[3][1]-l[0][1]
+        t0 = (l[0][0]-dx, l[0][1]-dy)
+        cv2.line(outimg, l[0], t0, colorCode(color), 2)
   
     # Draw the Ball
     ball.checkcollision(QRCodes)
+    ball.move()
     ball.draw(outimg)
+    
+    # Mirror flip the output image.
+    outimg = cv2.flip(outimg,1);
     
     # Display the resulting frame
     cv2.imshow(windowname, outimg)
