@@ -25,6 +25,8 @@ def colorCode(color):
         return (255,0,255)
     elif color == "cyan":
         return (255,255,0)
+    elif color == "purple":
+        return (128,0,128)
 
 def drawBorder(img, points, color, thickness):
     for idx0,point in enumerate(points):
@@ -56,8 +58,10 @@ print "\n\tQ or Esc to exit.\n"
 
 QRCodes = qrcodes.QRCodes(int(cap.get(CV_CAP_PROP_FRAME_HEIGHT)), int(cap.get(CV_CAP_PROP_FRAME_WIDTH)))
 
-ball = game.Ball((outimgw/2, outimgh/2), colorCode("magenta"), outimgw, outimgh)
-        
+ball = game.Ball((outimgw/2, outimgh/2), colorCode("red"), outimgw, outimgh)
+
+scores = game.Scores()
+    
 # Main Loop.
 while(True):
     # Capture a frame from the camera, and get it's shape.
@@ -88,7 +92,7 @@ while(True):
             
             
     # If too few QR Codes were found Scan for new QR Codes.
-    if numfound < 1:
+    if numfound < 2:
         zbarimage = zbar.Image(outimgw, outimgh, 'Y800', gray.tostring())
         scanner.scan(zbarimage)
         # Foreach new symbol found
@@ -120,7 +124,7 @@ while(True):
         elif qr.data == "B":
             color = "green"
         elif qr.data == "C":
-            color = "red"
+            color = "purple"
         elif qr.data == "D":
             color = "yellow"
         else:
@@ -138,11 +142,18 @@ while(True):
   
     # Draw the Ball
     ball.move()
-    ball.checkcollision(QRCodes)
+    ball.checkcollision(QRCodes, scores)
     ball.draw(outimg)
     
     # Mirror flip the output image.
-    #outimg = cv2.flip(outimg,1);
+    outimg = cv2.flip(outimg,1);
+    
+    # Draw the scores and message.
+    cv2.putText(outimg, str(scores.score1), (25,100), cv2.FONT_HERSHEY_SIMPLEX, 3.5, colorCode("magenta"), 4)
+    cv2.putText(outimg, str(scores.score2), (outimgw-125,100), cv2.FONT_HERSHEY_SIMPLEX, 3.5, colorCode("magenta"), 4)
+    if not scores.message.expired():
+        cv2.putText(outimg, scores.message.text, (outimgw/2-400,300), cv2.FONT_HERSHEY_SIMPLEX, 4.0, colorCode("magenta"), 8)
+    
     
     # Display the resulting frame
     cv2.imshow(windowname, outimg)
@@ -151,7 +162,12 @@ while(True):
     key = cv2.waitKey(1) & 0xFF
     if key == ord('q') or key ==27: 
         break
-
+    # Reset game on 'spacebar' press.
+    if key == ord(' '):
+        print "Reset"
+        scores.reset()
+        ball.reset()
+        
 # Release the capture device and destory the windows.
 cap.release()
 cv2.destroyAllWindows()
