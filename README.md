@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ###About
-This is a demo of an Augmented Reality concept using OpenCV, Zbar, and Python.  It scans the video source for QR Codes and replaces them with animated gifs.
+This is a demo of an augmented reality concept using OpenCV, Zbar, and Python.  It scans the video source for QR codes and replaces them with animated gifs. The QR codes can then be used to play a simple game of "pong".
 
 ###Setup
 You will want the OpenCV 2.4+ and Zbar 0.10+ packages installed along with their python packages. Add the animated gifs you want to the gifs/ subdirectory.
